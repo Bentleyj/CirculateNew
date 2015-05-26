@@ -35,11 +35,10 @@ void Costume::init(std::string input) {
 
 void Costume::initRandSensible(std::map<std::pair<std::string, std::string>, Segment>* allSegments) {
 	std::map<std::string, std::pair<JointType, JointType>>::iterator bonePair;
-	for(bonePair = bonePairs.begin(); bonePair != bonePairs.end(); bonePair++) {
+	for (bonePair = bonePairs.begin(); bonePair != bonePairs.end(); bonePair++) {
 		auto it = allSegments->begin();
 		std::advance(it, rand() % allSegments->size());
-		std::pair<std::string, std::string> newSegment = it->first;
-		segments[bonePair->first] = newSegment;
+		segments[bonePair->first] = std::make_pair(it->first.first, bonePair->first);
 		myJointPositions[bonePair->second.first] = ofVec3f();
 		myJointPositions[bonePair->second.second] = ofVec3f();
 	}
@@ -66,7 +65,9 @@ void Costume::draw(std::map<std::pair<std::string, std::string>, Segment>* allSe
 			ofVec3f tar = myJointPositions[bonePairs[segment->first].second];
 			ofVec3f diff = pos - tar;
 			float dist = diff.length();
-			float scale = ofMap(dist, 0, 200, 0, 1); //MAGIC NUMBERS!!!!
+			float scale;
+			if(segment->first == "head")  scale = ofMap(dist, 0, 150, 0, 1); //MAGIC NUMBERS!!!!
+			else scale = ofMap(dist, 0, 200, 0, 1);
 			allSegments->find(segment->second)->second.draw(pos, tar, scale);
 		}
 		visible = false;

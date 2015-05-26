@@ -4,9 +4,11 @@
 #include "ofxKinectforWindows2.h"
 #include "ofxAssimpModelLoader.h"
 #include "ofxSplashScreen.h"
+#include "ofxTween.h"
 #include "JointSet.h"
 #include "Segment.h"
 #include "Costume.h"
+#include "Ticker.h"
 
 class ofApp : public ofBaseApp{
 	public:
@@ -31,10 +33,11 @@ class ofApp : public ofBaseApp{
 		
 		ofxKFW2::Device kinect;
 		ofMesh background;
-		ofLight light;
+		ofLight light1, light2, light3;
 		ofMesh walls;
 		vector<std::string> preloadedCostumes;
 		vector<std::string> generatedCostumes;
+		map<std::string, std::string> venueCostumeLib;
 		map<std::string, Costume> costumesLib;
 		map<int, JointSet> activeJointSets;
 		map<int, std::string> activeCostumes;
@@ -43,5 +46,8 @@ class ofApp : public ofBaseApp{
 		std::map<std::pair<std::string, std::string>, Segment> segmentsLib;
 		std::string nextCostume;
 		ofxSplashScreen splashScreen;
-		bool loaded, nextModelChosen;
+		bool loaded, nextModelChosen, bClapsActive, bHighFivesActive, bDrawGui;
+		Ticker ticker;
+		std::string activeVenue;
+
 };

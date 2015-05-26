@@ -3,6 +3,10 @@ using namespace ofxKFW2;
 
 
 void ofApp::setup() {
+	bDrawGui = true;
+	bClapsActive = false;
+	bHighFivesActive = false;
+	ticker.loadFromFile("Predictions/future.txt");
 	//Set control Booleans
 	loaded = false;
 	nextModelChosen = false;
@@ -16,7 +20,9 @@ void ofApp::setup() {
 	kinect.initBodySource();
 
 	//set position of the light
-	light.setPosition(ofGetWidth()/4, ofGetHeight()/4, 0);
+	light1.setPosition(0, 0, 100);
+	light2.setPosition(ofGetWidth() / 2, ofGetHeight() / 2, 100);
+	light3.setPosition(ofGetWidth() / 2, -30, 0);
 
 	//Disable Arb Tex, necessary for ofxAssimp Texture mapping
 	ofDisableArbTex();
@@ -25,17 +31,18 @@ void ofApp::setup() {
 
 	//enable alpha blending for alpha colors
 	ofEnableAlphaBlending();
+
 }
 //--------------------------------------------------------------
 void ofApp::load(){
-
-	this->splashScreen.init("splashScreen.jpg"); 
+	this->splashScreen.init("splashScreen.jpg");
 	this->splashScreen.begin(); 
 
 	//populate costumesLib map by going through venues directory recursively
 	//only works if the names of the files are exactly the same as those inside bonePairs in Costume.cpp
 	//will skip over missing files and simply not draw them
 	std::string venuesPath = "venues/";
+	activeVenue = "All";
 	ofDirectory venues(venuesPath);
 	venues.listDir();
 	//open venues dir
@@ -45,6 +52,10 @@ void ofApp::load(){
 			venue.listDir();
 			 //open each venue dir
 			for(int j=0;j< venue.numFiles();j++) {
+				if (activeVenue != "All") {
+					vector<std::string> venueString = ofSplitString(venue.getPath(j), "\\");
+					if (venueString[1] != activeVenue) break;
+				}
 				ofDirectory costume(venue.getPath(j));
 				if(costume.isDirectory()) {
 					//for each costume:
@@ -95,7 +106,7 @@ void ofApp::load(){
 	map<std::string, Costume>::iterator cos;
 	for(cos = costumesLib.begin(); cos != costumesLib.end(); cos++) {
 		cout<<i<<": "<<cos->first<<endl;
-		i++;
+		i++; 
 	}
 	this->splashScreen.end(); 
 	loaded = true;
@@ -107,6 +118,7 @@ void ofApp::update(){
 		this->load();
 	} else {
 		this->kinect.update(); //update all the kinect streams
+		ticker.update();
 
 		//get all the bodies and find which ones are tracked
 		auto trackables = this->kinect.getBodySource()->getBodies(); //get bodies
@@ -209,7 +221,7 @@ void ofApp::update(){
 				if(!existsClapping) {
 					clappingBodies[*trackedId] = clapped.second;
 					// INSERT ON CLAP CODE HERE!
-					onClap(*trackedId);
+					if(bClapsActive) onClap(*trackedId);
 				}
 			} else {
 				std::map<int, ofVec3f>::iterator clappingBody;
@@ -236,7 +248,7 @@ void ofApp::update(){
 					if(!exists) {
 						highFivingPairs[std::make_pair(*trackedId, *remainingId)] = highFived.second;
 						//INSERT ON HIGH FIVE CODE HERE! (some has already been inserted)
-						onHighFive(*trackedId, *remainingId);
+						if(bHighFivesActive) onHighFive(*trackedId, *remainingId);
 					}
 				} else {
 					std::map<std::pair<int, int>, ofVec3f>::iterator highFivingPair;
@@ -286,13 +298,14 @@ void ofApp::update(){
 		for(clapperToDelete = clappersToDelete.begin(); clapperToDelete != clappersToDelete.end(); clapperToDelete++) {
 			clappingBodies.erase(*clapperToDelete);
 		}
-
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 	if(loaded) {
+		ofBackgroundGradient(ofColor(255), ofColor(200), OF_GRADIENT_CIRCULAR);
+
 		//draw color stream if you want
 
 		//ofPushStyle();
@@ -309,25 +322,28 @@ void ofApp::draw(){
 			ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 			ofEnableDepthTest();
 			glShadeModel(GL_SMOOTH);
-			this->light.enable();
-			walls.draw();
-			ofEnableSeparateSpecularLight();
+			//this->light1.enable();
+			//this->light2.enable();
+			//this->light3.enable();
+			//walls.draw();
+			//ofEnableSeparateSpecularLight();
 			ofSetColor(255);
-			//light.draw();
 			int spacing = 0;
 			std::map<int, std::string>::iterator costume;
 			for(costume = activeCostumes.begin(); costume != activeCostumes.end(); costume++) {
 				std::map<JointType, ofVec3f> body = this->kinect.getBodySource()->getPositions3D(costume->first);
 				costumesLib[costume->second].update(activeJointSets.find(costume->first)->second.getVals());
 				costumesLib[costume->second].draw(&segmentsLib);
-				ofDrawBitmapString(ofToString(costume->first), 10, 10-spacing);
 				spacing += 10;
 			}
-			this->light.disable();
+			ofDisableSeparateSpecularLight();
+			//this->light1.disable();
+			//this->light2.disable();
+			//this->light3.disable();
 		ofPopStyle();
    		ofPopMatrix();
 
-		if(highFivingPairs.size() > 0) {
+		/*if(highFivingPairs.size() > 0) {
 			ofPushStyle();
 			std::map<std::pair<int, int>, ofVec3f>::iterator highFivingPair;
 			for(highFivingPair = highFivingPairs.begin(); highFivingPair != highFivingPairs.end(); highFivingPair++) {
@@ -353,27 +369,49 @@ void ofApp::draw(){
 				ofDisableAlphaBlending();
 			}
 			ofPopStyle();
+		}*/
+		if (bDrawGui) {
+			ofPushStyle();
+			ofSetColor(0);
+			int max = preloadedCostumes.size() > 9 ? 9 : preloadedCostumes.size();
+			ofDrawBitmapString("venue loaded: " + activeVenue, 10, 10);
+			for (int i = 0; i < max; i++) {
+				ofSetColor(0);
+				ofDrawBitmapString(ofToString(i + 1) + ": " + preloadedCostumes[i], 10, 12 * i + 20);
+				if (i == max - 1) {
+					string val = (nextModelChosen == false) ? "random" : nextCostume;
+					ofDrawBitmapString("next costume: " + val, 10, 12 * (i + 1) + 20);
+				}
+			}
+			ofDrawBitmapString("Claps Active: " + ofToString(bClapsActive) + " press c to toggle", 10, ofGetHeight() - 50);
+			ofDrawBitmapString("Highfives Active: " + ofToString(bHighFivesActive) + " press h to toggle", 10, ofGetHeight() - 70);
+			ofPopStyle();
 		}
 	}
+	ofPushStyle();
+		ticker.draw(0, ofGetHeight() - 40);
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-	switch (key) {
-		case 'q':
-			nextCostume = "blocks";
-			nextModelChosen = true;
-			break;
-		case 'w':
-			nextCostume = "spheres";
-			nextModelChosen = true;
-			break;
-		case 'e':
-			nextCostume = "woman";
-			nextModelChosen = true;
-			break;
-		default:
-			break;
+	if (key == 'c') {
+		bClapsActive = !bClapsActive;
+	}
+	if (key == 'h') {
+		bHighFivesActive = !bHighFivesActive;
+	}
+	if (key == 'g') {
+		bDrawGui = !bDrawGui;
+	}
+	char a = key;
+	int ia = a - '0' - 1;
+	if(ia < preloadedCostumes.size() && ia >= 0){
+		nextCostume = preloadedCostumes[ia];
+		cout<<"Next Costume Will Be: "<<preloadedCostumes[ia]<<endl;
+		nextModelChosen = true;
+	} else {
+		cout<<"Button does not correspond to a costume, next costume not changed!"<<endl;
 	}
 }
 
