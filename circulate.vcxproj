@@ -43,7 +43,7 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_debug</TargetName>
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <IncludePath>$(KINECTSDK20_DIR)\inc;$(IncludePath)</IncludePath>
     <LibraryPath>$(KINECTSDK20_DIR)\lib\x86;$(LibraryPath)</LibraryPath>
@@ -63,8 +63,8 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxAssimpModelLoader\libs;..\..\..\addons\ofxAssimpModelLoader\src;..\..\..\addons\ofxAssimpModelLoader\libs\assimp;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include\Compiler;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib\vs;..\..\..\addons\ofxKinectForWindows2\libs;..\..\..\addons\ofxKinectForWindows2\src;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Data;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Source;..\..\..\addons\ofxSplashScreen\libs;..\..\..\addons\ofxTween\src\Easings;..\..\..\addons\ofxTween\src;..\..\..\addons\ofxSplashScreen\src</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxAssimpModelLoader\libs;..\..\..\addons\ofxAssimpModelLoader\src;..\..\..\addons\ofxAssimpModelLoader\libs\assimp;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include\Compiler;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib\vs;..\..\..\addons\ofxKinectForWindows2\libs;..\..\..\addons\ofxKinectForWindows2\src;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Data;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Source;..\..\..\addons\ofxSplashScreen\libs;..\..\..\addons\ofxTween\src\Easings;..\..\..\addons\ofxTween\src;..\..\..\addons\ofxXmlSettings\src;..\..\..\addons\ofxXmlSettings\libs;..\..\..\addons\ofxSplashScreen\src\</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -73,6 +73,8 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <AdditionalDependencies>$(KINECTSDK20_DIR)\Lib\x86\Kinect20.lib;%(AdditionalDependencies);assimp.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib\vs</AdditionalLibraryDirectories>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,12 +83,13 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxAssimpModelLoader\libs;..\..\..\addons\ofxAssimpModelLoader\src;..\..\..\addons\ofxAssimpModelLoader\libs\assimp;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include\Compiler;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib\vs;..\..\..\addons\ofxKinectForWindows2\libs;..\..\..\addons\ofxKinectForWindows2\src;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Data;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Source;..\..\..\addons\ofxSplashScreen\libs;..\..\..\addons\ofxTween\src\Easings;..\..\..\addons\ofxTween\src;..\..\..\addons\ofxSplashScreen\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\..\..\addons\ofxAssimpModelLoader\libs;..\..\..\addons\ofxAssimpModelLoader\src;..\..\..\addons\ofxAssimpModelLoader\libs\assimp;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\include\Compiler;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib;..\..\..\addons\ofxAssimpModelLoader\libs\assimp\lib\vs;..\..\..\addons\ofxKinectForWindows2\libs;..\..\..\addons\ofxKinectForWindows2\src;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Data;..\..\..\addons\ofxKinectForWindows2\src\ofxKinectForWindows2\Source;..\..\..\addons\ofxSplashScreen\libs;..\..\..\addons\ofxTween\src\Easings;..\..\..\addons\ofxTween\src;..\..\..\addons\ofxXmlSettings\src;..\..\..\addons\ofxXmlSettings\libs;..\..\..\addons\ofxSplashScreen\src\</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -123,6 +126,10 @@
     <ClCompile Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingQuint.cpp" />
     <ClCompile Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingSine.cpp" />
     <ClCompile Include="..\..\..\addons\ofxTween\src\ofxTween.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlerror.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.cpp" />
     <ClCompile Include="src\Costume.cpp" />
     <ClCompile Include="src\Integratorf.cpp" />
     <ClCompile Include="src\IntegratorVec3f.cpp" />
@@ -196,6 +203,8 @@
     <ClInclude Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingQuint.h" />
     <ClInclude Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingSine.h" />
     <ClInclude Include="..\..\..\addons\ofxTween\src\ofxTween.h" />
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h" />
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.h" />
     <ClInclude Include="src\Costume.h" />
     <ClInclude Include="src\Integratorf.h" />
     <ClInclude Include="src\IntegratorVec3f.h" />

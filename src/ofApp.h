@@ -5,6 +5,7 @@
 #include "ofxAssimpModelLoader.h"
 #include "ofxSplashScreen.h"
 #include "ofxTween.h"
+#include "ofxXmlSettings.h"
 #include "JointSet.h"
 #include "Segment.h"
 #include "Costume.h"
@@ -31,10 +32,12 @@ class ofApp : public ofBaseApp{
 		void onHighFive(int trackingId1, int trackingId2);
 		void onClap(int trackingId);
 		
+		map<string, ofImage> backgroundImages;
+		vector<string> backgroundNames;
+		map<char, int> CostumeButtons;
+		const static char keys[26];
+		int venueIndex;
 		ofxKFW2::Device kinect;
-		ofMesh background;
-		ofLight light1, light2, light3;
-		ofMesh walls;
 		vector<std::string> preloadedCostumes;
 		vector<std::string> generatedCostumes;
 		map<std::string, std::string> venueCostumeLib;
@@ -49,5 +52,4 @@ class ofApp : public ofBaseApp{
 		bool loaded, nextModelChosen, bClapsActive, bHighFivesActive, bDrawGui;
 		Ticker ticker;
 		std::string activeVenue;
-
 };

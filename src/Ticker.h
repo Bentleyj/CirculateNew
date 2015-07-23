@@ -10,13 +10,16 @@
 class Ticker {
 public:
 	Ticker(int _fontSize = 20, float _speed = 0.5f, int width = ofGetWidth(), int height = 40);
+	~Ticker();
 	void draw(int _x, int _y);
 	void update();
 	bool loadFromFile(string _dataLoc);
+	void setStepsPerSecond(float);
+	float getStepsPerSecond();
 
 private:
 	unsigned long timer;
-	float stepsPerMilli;
+	float stepsPerSecond;
 	int getFullTextWidth();
 	ofImage graphic;
 	int fullTextWidth;
@@ -25,5 +28,5 @@ private:
 	ofFbo buffer;
 	ofBuffer textBuffer;
 	vector<string> events;
-	ofTrueTypeFont font;
+	ofTrueTypeFont* font;
 };

@@ -7,7 +7,8 @@
 #include "Ticker.h"
 
 Ticker::Ticker(int _fontSize, float _speed, int _width, int _height) {
-	bool loaded = font.loadFont("Fonts/Lato-Black.ttf", 20);
+	font = new ofTrueTypeFont();
+	bool loaded = font->loadFont("Fonts/Lato-Black.ttf", 20);
 	if (loaded) cout << "Ticker(): Font loaded successfully" << endl;
 	else cout << "Ticker(): Font failed to load" << endl;
 	buffer.allocate(_width, _height );
@@ -16,7 +17,7 @@ Ticker::Ticker(int _fontSize, float _speed, int _width, int _height) {
 	}
 	step = 0.0f;
 	speed = 0.25f;
-	stepsPerMilli = 0.1;
+	stepsPerSecond = 50;
 }
 
 bool Ticker::loadFromFile(string fileLoc) {
@@ -38,9 +39,9 @@ void Ticker::update() {
 		float offset = 0;
 		for (auto event : events) {
 			if (event.size() != 0) {
-				font.drawString(event, offset, 0);
-				float width = font.getStringBoundingBox(event, 0, 0).width;
-				float height = font.getStringBoundingBox(event, 0, 0).height;
+				font->drawString(event, offset, 0);
+				float width = font->getStringBoundingBox(event, 0, 0).width;
+				float height = font->getStringBoundingBox(event, 0, 0).height;
 				offset += width;
 				offset += 20;
 				ofCircle(offset, -height / 3, 10);
@@ -48,7 +49,7 @@ void Ticker::update() {
 			}
 		}
 	buffer.end();
-	step += speed;
+	step += stepsPerSecond * 1/ofGetFrameRate();
 	if (step > fullTextWidth) step = (speed > 0) ? -ofGetWidth() : ofGetWidth();
 }
 
@@ -60,11 +61,23 @@ int Ticker::getFullTextWidth() {
 	float offset = 0;
 	for (auto event : events) {
 		if (event.size() != 0) {
-			float width = font.getStringBoundingBox(event, 0, 0).width;
+			float width = font->getStringBoundingBox(event, 0, 0).width;
 			offset += width;
 			offset += 20;
 			offset += 30;
 		}
 	}
 	return offset;
+}
+
+void Ticker::setStepsPerSecond(float input) {
+	stepsPerSecond = input;
+}
+
+float Ticker::getStepsPerSecond() {
+	return stepsPerSecond;
+}
+
+Ticker::~Ticker() {
+	delete font;
 }

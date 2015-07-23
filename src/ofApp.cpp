@@ -1,42 +1,57 @@
 #include "ofApp.h"
 using namespace ofxKFW2;
 
+const char ofApp::keys[] = {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'};
 
 void ofApp::setup() {
-	bDrawGui = true;
+	bDrawGui = false;
 	bClapsActive = false;
 	bHighFivesActive = false;
-	ticker.loadFromFile("Predictions/future.txt");
+	ticker.loadFromFile("Predictions/future.txt"); \
+	ofHideCursor();
 	//Set control Booleans
 	loaded = false;
 	nextModelChosen = false;
 
+	ofLogToFile("logFile.txt", false);
+
 	//set log level, mostly for logging ofxAssimpModelLoader
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	//ofSetLogLevel(OF_LOG_VERBOSE);
+
+	//load venueIndex
+	venueIndex = 0;
 
 	//setup kinect streams
 	kinect.open();
 	kinect.initColorSource();
 	kinect.initBodySource();
 
-	//set position of the light
-	light1.setPosition(0, 0, 100);
-	light2.setPosition(ofGetWidth() / 2, ofGetHeight() / 2, 100);
-	light3.setPosition(ofGetWidth() / 2, -30, 0);
-
 	//Disable Arb Tex, necessary for ofxAssimp Texture mapping
 	ofDisableArbTex();
-
-	walls = generateWallMesh(1000);
 
 	//enable alpha blending for alpha colors
 	ofEnableAlphaBlending();
 
+	//load Background Image
+	ofDirectory Backgrounds("Backgrounds");
+	Backgrounds.allowExt("jpg");
+	Backgrounds.listDir();
+	for (int i = 0; i < Backgrounds.numFiles(); i++) {
+		string name;
+		vector<string> names = ofSplitString(Backgrounds.getPath(i), "\\");
+		name = names[1];
+		names = ofSplitString(name, ".");
+		name = names[0];
+		ofImage image;
+		image.loadImage(Backgrounds.getPath(i));
+		backgroundImages[name] = image;
+		backgroundNames.push_back(name);
+	}
 }
 //--------------------------------------------------------------
 void ofApp::load(){
-	this->splashScreen.init("splashScreen.jpg");
-	this->splashScreen.begin(); 
+	//this->splashScreen.init("splashScreen.jpg");
+	//this->splashScreen.begin(); 
 
 	//populate costumesLib map by going through venues directory recursively
 	//only works if the names of the files are exactly the same as those inside bonePairs in Costume.cpp
@@ -70,6 +85,12 @@ void ofApp::load(){
 						ofxAssimpModelLoader model; 
 						part.allowExt("dae");
 						part.listDir();
+						//sort name of each costume out
+						vector<std::string> splitString = ofSplitString(costume.getPath(k), "\\"); //split path string on "\" to get venue and costume names
+						cos = splitString[2];
+						std::vector<std::string> splitPart = ofSplitString(splitString[3], "."); //get the nameof the body part by splitting the string on "." to remove .dae extension
+						std::string partName = splitPart[0];
+						std::pair<std::string, std::string> pair = std::make_pair(cos, partName);
 						//load each .dae file
 						model.loadModel(part.getPath(0), true);
 						//save the meshes and textures for each file into blocks
@@ -80,12 +101,6 @@ void ofApp::load(){
 							std::pair<ofMesh, ofTexture> block = make_pair(mesh, tex); //associate the two values
 							blocks.push_back(block); //add it to blocks vector
 						}
-						//sort name of each costume out
-						vector<std::string> splitString = ofSplitString(costume.getPath(k), "\\"); //split path string on "\" to get venue and costume names
-						cos = splitString[2];
-						std::vector<std::string> splitPart = ofSplitString(splitString[3], "."); //get the nameof the body part by splitting the string on "." to remove .dae extension
-						std::string partName = splitPart[0];
-						std::pair<std::string, std::string> pair = std::make_pair(cos, partName);
 						//initialize segment with meshes textures and location
 						Segment seg;
 						seg.init(blocks, partName);
@@ -93,9 +108,9 @@ void ofApp::load(){
 						segmentsLib[pair] = seg; // populate segments map for random costumes
 					}
 					//for each costume create a costume, initialize it with the loaded segments and save it to the costumesLib
-					Costume costume;
-					costume.init(cos);
-					costumesLib[cos] = costume;
+					Costume newCostume;
+					newCostume.init(cos);
+					costumesLib[cos] = newCostume;
 					preloadedCostumes.push_back(cos);
 				}
 			}
@@ -106,7 +121,7 @@ void ofApp::load(){
 	map<std::string, Costume>::iterator cos;
 	for(cos = costumesLib.begin(); cos != costumesLib.end(); cos++) {
 		cout<<i<<": "<<cos->first<<endl;
-		i++; 
+		i++;
 	}
 	this->splashScreen.end(); 
 	loaded = true;
@@ -143,12 +158,11 @@ void ofApp::update(){
 					auto it = costumesLib.begin();
 					std::advance(it, rand() % costumesLib.size());
 					nextCostume = it->first;
-				} else {
-					nextModelChosen = false;
 				}
 				activeCostumes[*trackedId] = nextCostume; //add an active costume if the id is not found in the list of already active costumes
 				JointSet newJointSet = JointSet(this->kinect.getBodySource()->getPositions3D(*trackedId)); //add an active jointset if the id is not found in the list of already active jointSets
 				activeJointSets[*trackedId] = newJointSet;
+				ofLog() << "[" << ofGetTimestampString() << "]" << " " << *trackedId << " entered the frame" << endl;
 			}
 		}
 
@@ -165,6 +179,7 @@ void ofApp::update(){
 			}
 			if(!stillTracked) {
 				costumesToErase.push_back(activeCostume->first); //if the body is no longer tracked then add it to the list of costumes to be removed
+				ofLog() << "[" << ofGetTimestampString() << "]" << " " << activeCostume->first << " left the frame" << endl;
 			}
 		}
 
@@ -228,7 +243,6 @@ void ofApp::update(){
 				for(clappingBody = clappingBodies.begin(); clappingBody != clappingBodies.end(); clappingBody++) {
 					if(clappingBody->first == *trackedId) {
 						clappingBodies.erase(clappingBody);
-						cout<<*trackedId<<" stopped clapping!"<<endl;
 						break;
 					}
 				}
@@ -255,7 +269,6 @@ void ofApp::update(){
 					for(highFivingPair = highFivingPairs.begin(); highFivingPair != highFivingPairs.end(); highFivingPair++) {
 						if(highFivingPair->first == make_pair(*trackedId, *remainingId)) {
 							highFivingPairs.erase(highFivingPair);
-							cout<<"pair: "<<*trackedId<<", "<< *remainingId<< " removed"<<endl;
 							break;
 						}
 					}
@@ -304,29 +317,14 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	if(loaded) {
-		ofBackgroundGradient(ofColor(255), ofColor(200), OF_GRADIENT_CIRCULAR);
-
-		//draw color stream if you want
-
-		//ofPushStyle();
-		//	glDisable(GL_DEPTH_TEST);
-		//	ofSetColor(255);
-		//	this->kinect.getBodySource()->drawBodies();
-		//	this->kinect.getColorSource()->draw(0, 0, ofGetWidth()/2, ofGetHeight()/2);
-		//	glEnable(GL_DEPTH_TEST);
-		//ofPopStyle();
-
-		//draw all the active costumes and a list of all the tracked Ids
+		ofSetColor(255);
+		glDisable(GL_DEPTH_TEST);
+		backgroundImages[backgroundNames[venueIndex]].draw(0, 0, ofGetWidth(), ofGetHeight());
 		ofPushMatrix();
 		ofPushStyle();
 			ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-			ofEnableDepthTest();
+			glEnable(GL_DEPTH_TEST);
 			glShadeModel(GL_SMOOTH);
-			//this->light1.enable();
-			//this->light2.enable();
-			//this->light3.enable();
-			//walls.draw();
-			//ofEnableSeparateSpecularLight();
 			ofSetColor(255);
 			int spacing = 0;
 			std::map<int, std::string>::iterator costume;
@@ -337,9 +335,6 @@ void ofApp::draw(){
 				spacing += 10;
 			}
 			ofDisableSeparateSpecularLight();
-			//this->light1.disable();
-			//this->light2.disable();
-			//this->light3.disable();
 		ofPopStyle();
    		ofPopMatrix();
 
@@ -370,48 +365,63 @@ void ofApp::draw(){
 			}
 			ofPopStyle();
 		}*/
+		ofPushStyle();
+			ticker.draw(0, ofGetHeight() - 40);
+		ofPopStyle();
 		if (bDrawGui) {
 			ofPushStyle();
+			ofSetColor(255, 255, 255, 127);
+			ofRect(0, 0, ofGetWidth(), ofGetHeight());
 			ofSetColor(0);
-			int max = preloadedCostumes.size() > 9 ? 9 : preloadedCostumes.size();
-			ofDrawBitmapString("venue loaded: " + activeVenue, 10, 10);
-			for (int i = 0; i < max; i++) {
-				ofSetColor(0);
-				ofDrawBitmapString(ofToString(i + 1) + ": " + preloadedCostumes[i], 10, 12 * i + 20);
-				if (i == max - 1) {
+			//int max = preloadedCostumes.size() > 9 ? 9 : preloadedCostumes.size();
+			ofDrawBitmapString("venue loaded: " + activeVenue, 20, 20);
+			for (int i = 0; i < preloadedCostumes.size(); i++) {
+				ofDrawBitmapString(ofToString(keys[i]) + ": " + preloadedCostumes[i], 20, 12 * i + 40);
+				if (i == preloadedCostumes.size() - 1) {
 					string val = (nextModelChosen == false) ? "random" : nextCostume;
-					ofDrawBitmapString("next costume: " + val, 10, 12 * (i + 1) + 20);
+					ofDrawBitmapString("next costume: " + val, 20, 12 * (i + 1) + 40);
 				}
 			}
 			ofDrawBitmapString("Claps Active: " + ofToString(bClapsActive) + " press c to toggle", 10, ofGetHeight() - 50);
 			ofDrawBitmapString("Highfives Active: " + ofToString(bHighFivesActive) + " press h to toggle", 10, ofGetHeight() - 70);
+			ofDrawBitmapString("Ticker Scroll Speed: " + ofToString(ticker.getStepsPerSecond()) + " control with up and down arrows", 10, ofGetHeight() - 90);
 			ofPopStyle();
 		}
 	}
-	ofPushStyle();
-		ticker.draw(0, ofGetHeight() - 40);
-	ofPopStyle();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+	if (key == ' ') {
+		if (bDrawGui) ofHideCursor();
+		else ofShowCursor();
+		bDrawGui = !bDrawGui;
+	}
 	if (key == 'c') {
 		bClapsActive = !bClapsActive;
 	}
 	if (key == 'h') {
 		bHighFivesActive = !bHighFivesActive;
 	}
-	if (key == 'g') {
-		bDrawGui = !bDrawGui;
+	if (key == 'v') {
+		venueIndex++;
+		venueIndex %= backgroundImages.size();
 	}
-	char a = key;
-	int ia = a - '0' - 1;
-	if(ia < preloadedCostumes.size() && ia >= 0){
-		nextCostume = preloadedCostumes[ia];
-		cout<<"Next Costume Will Be: "<<preloadedCostumes[ia]<<endl;
-		nextModelChosen = true;
-	} else {
-		cout<<"Button does not correspond to a costume, next costume not changed!"<<endl;
+	for (int i = 0; i < preloadedCostumes.size(); i++) {
+		if (key == keys[i]) {
+			nextCostume = preloadedCostumes[i];
+			nextModelChosen = true;
+			break;
+		}
+	}
+	if (key == '0') {
+		nextModelChosen = false;
+	}
+	if (key == OF_KEY_UP) {
+		ticker.setStepsPerSecond(ticker.getStepsPerSecond() + 1);
+	}
+	if (key == OF_KEY_DOWN) {
+		ticker.setStepsPerSecond(ticker.getStepsPerSecond() - 1);
 	}
 }
 
@@ -498,11 +508,9 @@ void ofApp::onHighFive(int trackingId1, int trackingId2) {
 	std::string cosName2 = activeCostumes.find(trackingId2)->second;
 	activeCostumes.find(trackingId1)->second = cosName2;
 	activeCostumes.find(trackingId2)->second = cosName1;
-	cout<<"Pair: "<<trackingId1<<", "<<trackingId2<< " added"<<endl;
 }
 
 void ofApp::onClap(int trackingId) {
-	cout<<trackingId<<" clapped!"<<endl;
 	Costume newCos;
 	newCos.initRandSensible(&segmentsLib);
 	std::string cosName = ofToString(trackingId);

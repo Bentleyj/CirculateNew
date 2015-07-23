@@ -106,6 +106,18 @@
     <ClCompile Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingSine.cpp">
       <Filter>addons\ofxTween\src\Easing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlerror.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.cpp">
+      <Filter>addons\ofxXmlSettings\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -161,6 +173,15 @@
     </Filter>
     <Filter Include="addons\ofxTween\src\Easing">
       <UniqueIdentifier>{d4144f99-7e4c-4a2c-a9a6-562c0948e115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings">
+      <UniqueIdentifier>{9a777a3f-0e8f-46fc-9de3-4bc9c49c221d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings\libs">
+      <UniqueIdentifier>{50ea1cd6-e5d1-468e-a887-5cd244f2fd61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings\src">
+      <UniqueIdentifier>{878285c1-7379-4f4f-825e-1224e70f1031}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -373,6 +394,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxTween\src\Easings\ofxEasingSine.h">
       <Filter>addons\ofxTween\src\Easing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.h">
+      <Filter>addons\ofxXmlSettings\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
